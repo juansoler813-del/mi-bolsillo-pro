@@ -795,7 +795,7 @@ def main(page: ft.Page):
             ft.Container(height=100),
             ft.Container(
                 width=120, height=120,
-                gradient=ft.LinearGradient(colors=[COLORES["success"], "#059669"]),
+                gradient=ft.LinearGradient(begin=ft.Alignment(-1,-1), end=ft.Alignment(1,1), colors=[COLORES["success"], "#059669"]),
                 border_radius=60,
                 content=ft.Text("🎯", size=60, color="white", text_align="center"),
             ),
@@ -811,7 +811,7 @@ def main(page: ft.Page):
             ft.Container(height=100),
             ft.Container(
                 width=120, height=120,
-                gradient=ft.LinearGradient(colors=[COLORES["danger"], "#dc2626"]),
+                gradient=ft.LinearGradient(begin=ft.Alignment(-1,-1), end=ft.Alignment(1,1), colors=[COLORES["danger"], "#dc2626"]),
                 border_radius=60,
                 content=ft.Text("💳", size=60, color="white", text_align="center"),
             ),
@@ -874,12 +874,12 @@ def main(page: ft.Page):
 
 
 # =========================================================
-# Para Render - Gunicorn necesita 'app' en el nivel superior
+# PARA RENDER - ÚNICA INSTANCIA DE app EN NIVEL SUPERIOR
 # =========================================================
 app = ft.app(target=main)
 
 # =========================================================
-# Punto de entrada (solo para ejecución local)
+# PUNTO DE ENTRADA LOCAL
 # =========================================================
 if __name__ == "__main__":
     ft.app(target=main)
