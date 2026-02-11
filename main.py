@@ -2064,13 +2064,12 @@ def main(page: ft.Page):
 
 
 # =========================================================
-# Punto de entrada
+# Para Render - Gunicorn necesita 'app' en el nivel superior
 # =========================================================
+app = ft.app(target=main)
+
 # =========================================================
-# Punto de entrada
-# =========================================================
-# =========================================================
-# Punto de entrada
+# Punto de entrada (solo para ejecución local)
 # =========================================================
 if __name__ == "__main__":
-    app = ft.app(target=main)
+    ft.app(target=main)
