@@ -6,16 +6,12 @@ import math
 from typing import Dict, List, Tuple, Optional
 
 # =========================================================
-# MOTOR DE IA MEJORADO - ANÁLISIS CONVERSACIONAL
+# MOTOR DE IA
 # =========================================================
 class MotorIA:
-    """Motor de Inteligencia Artificial para análisis financiero conversacional"""
-    
     @staticmethod
     def calcular_score_financiero(ingresos: float, gastos: float, ahorros: float, deudas: float) -> Dict:
-        """Calcula un score financiero detallado (0-100) convertido a escala 0-10"""
         score = 50
-        
         if ingresos > 0:
             tasa_ahorro = (ingresos - gastos) / ingresos
             if tasa_ahorro >= 0.30: score += 30
@@ -123,7 +119,6 @@ def _fmt_money(n: float) -> str:
 # APLICACIÓN PRINCIPAL
 # =========================================================
 def main(page: ft.Page):
-    # Configuración
     page.title = "Mi Bolsillo Pro"
     page.theme_mode = "dark"
     page.window_width = 450
@@ -132,7 +127,6 @@ def main(page: ft.Page):
     page.padding = 0
     page.scroll = ft.ScrollMode.AUTO
     
-    # Colores
     COLORES = {
         "bg": "#0f172a", "bg_secondary": "#1e293b", "card": "#1e293b",
         "card_hover": "#334155", "input": "#334155", "border": "#475569",
@@ -141,7 +135,6 @@ def main(page: ft.Page):
         "danger": "#ef4444", "purple": "#8b5cf6"
     }
     
-    # Base de datos
     conn = sqlite3.connect("mi_bolsillo.db", check_same_thread=False)
     cursor = conn.cursor()
     
@@ -159,7 +152,6 @@ def main(page: ft.Page):
     """)
     conn.commit()
     
-    # Estado
     hoy = datetime.datetime.now()
     estado = {
         "mes": str(hoy.month).zfill(2),
@@ -171,7 +163,7 @@ def main(page: ft.Page):
     motor_ia = MotorIA()
     
     # =========================================================
-    # Funciones auxiliares
+    # FUNCIONES AUXILIARES
     # =========================================================
     def toast(msg, color=COLORES["primary"]):
         page.snack_bar = ft.SnackBar(
@@ -201,14 +193,14 @@ def main(page: ft.Page):
         )
     
     # =========================================================
-    # Dashboard
+    # DASHBOARD
     # =========================================================
-    txt_score = ft.Text("0", size=56, weight="bold", color=COLORES["text"])
-    txt_nivel = ft.Text("Calculando...", size=14, color=COLORES["primary"], weight="bold")
+    txt_score = ft.Text("0", size=56, weight=ft.FontWeight.BOLD, color=COLORES["text"])
+    txt_nivel = ft.Text("Calculando...", size=14, color=COLORES["primary"], weight=ft.FontWeight.BOLD)
     txt_emoji_score = ft.Text("💰", size=48)
-    txt_ingresos = ft.Text("$0", size=20, weight="bold", color=COLORES["success"])
-    txt_gastos = ft.Text("$0", size=20, weight="bold", color=COLORES["danger"])
-    txt_balance = ft.Text("$0", size=16, weight="bold", color=COLORES["text"])
+    txt_ingresos = ft.Text("$0", size=20, weight=ft.FontWeight.BOLD, color=COLORES["success"])
+    txt_gastos = ft.Text("$0", size=20, weight=ft.FontWeight.BOLD, color=COLORES["danger"])
+    txt_balance = ft.Text("$0", size=16, weight=ft.FontWeight.BOLD, color=COLORES["text"])
     
     card_score = ft.Container(
         margin=ft.margin.only(left=16, right=16, top=16, bottom=8),
@@ -241,12 +233,13 @@ def main(page: ft.Page):
     )
     
     # =========================================================
-    # Filtros
+    # FILTROS
     # =========================================================
     dropdown_mes = ft.Dropdown(
         value=estado["mes"], expand=True,
         bgcolor=COLORES["input"], color=COLORES["text"],
-        border_radius=12, border_color="transparent", text_size=14, height=48,
+        border_radius=12, border_color=ft.colors.TRANSPARENT,
+        text_size=14, height=48,
         options=[
             ft.dropdown.Option("01", "Ene"), ft.dropdown.Option("02", "Feb"),
             ft.dropdown.Option("03", "Mar"), ft.dropdown.Option("04", "Abr"),
@@ -260,7 +253,8 @@ def main(page: ft.Page):
     txt_filtro_dia = ft.TextField(
         hint_text="Día", width=80,
         bgcolor=COLORES["input"], color=COLORES["text"],
-        border_radius=12, border_color="transparent", text_size=14, height=48,
+        border_radius=12, border_color=ft.colors.TRANSPARENT,
+        text_size=14, height=48,
         keyboard_type=ft.KeyboardType.NUMBER
     )
     
@@ -276,35 +270,47 @@ def main(page: ft.Page):
         content=ft.Column([
             ft.Row([
                 ft.Column([
-                    ft.Text(f"{dropdown_mes.value} {estado['anio']}", size=16, weight="bold", color=COLORES["text"]),
+                    ft.Text(f"{dropdown_mes.value} {estado['anio']}", size=16, weight=ft.FontWeight.BOLD, color=COLORES["text"]),
                     ft.Text("Filtrar movimientos", size=11, color=COLORES["text_secondary"])
                 ])
             ]),
             ft.Row([dropdown_mes, txt_filtro_dia], spacing=8),
-            crear_boton("Aplicar Filtros", "🔍", aplicar_filtros, COLORES["primary"], True)
+            ft.Container(
+                padding=ft.padding.symmetric(horizontal=20, vertical=12),
+                bgcolor=COLORES["primary"], border_radius=12,
+                on_click=aplicar_filtros, ink=True,
+                content=ft.Row([
+                    ft.Text("🔍", size=16),
+                    ft.Text("Aplicar Filtros", color="white", weight=ft.FontWeight.BOLD, size=14)
+                ], alignment=ft.MainAxisAlignment.CENTER, spacing=8)
+            )
         ], spacing=12)
     )
     
     # =========================================================
-    # Formulario
+    # FORMULARIO
     # =========================================================
     txt_descripcion = ft.TextField(
         hint_text="Descripción", expand=True,
         bgcolor=COLORES["input"], color=COLORES["text"],
-        border_radius=12, border_color="transparent", text_size=14, height=52
+        border_radius=12, border_color=ft.colors.TRANSPARENT,
+        focused_border_color=COLORES["primary"],
+        text_size=14, height=52
     )
     
     txt_valor = ft.TextField(
         hint_text="$ Valor", expand=True,
         bgcolor=COLORES["input"], color=COLORES["text"],
-        border_radius=12, border_color="transparent",
+        border_radius=12, border_color=ft.colors.TRANSPARENT,
+        focused_border_color=COLORES["primary"],
         keyboard_type=ft.KeyboardType.NUMBER, text_size=14, height=52
     )
     
     dropdown_tipo = ft.Dropdown(
         value="GASTO", expand=True,
         bgcolor=COLORES["input"], color=COLORES["text"],
-        border_radius=12, border_color="transparent", text_size=14, height=52,
+        border_radius=12, border_color=ft.colors.TRANSPARENT,
+        text_size=14, height=52,
         options=[
             ft.dropdown.Option("INGRESO", "💰 Ingreso"),
             ft.dropdown.Option("GASTO", "💸 Gasto")
@@ -314,16 +320,20 @@ def main(page: ft.Page):
     txt_categoria = ft.TextField(
         hint_text="Categoría", expand=True,
         bgcolor=COLORES["input"], color=COLORES["text"],
-        border_radius=12, border_color="transparent", text_size=14, height=52
+        border_radius=12, border_color=ft.colors.TRANSPARENT,
+        focused_border_color=COLORES["primary"],
+        text_size=14, height=52
     )
     
     def guardar_movimiento(e):
         try:
             if not txt_valor.value:
-                toast("⚠️ Ingresa un valor", COLORES["warning"]); return
+                toast("⚠️ Ingresa un valor", COLORES["warning"])
+                return
             valor = float(txt_valor.value.replace(",", ""))
             if valor <= 0:
-                toast("⚠️ El valor debe ser mayor a 0", COLORES["warning"]); return
+                toast("⚠️ El valor debe ser mayor a 0", COLORES["warning"])
+                return
             
             desc = (txt_descripcion.value or "SIN DESCRIPCIÓN").strip().upper()
             tipo = dropdown_tipo.value
@@ -338,54 +348,70 @@ def main(page: ft.Page):
                   ahora.strftime("%d/%m"), int(ahora.timestamp()), cat))
             conn.commit()
             
-            txt_valor.value = ""; txt_descripcion.value = ""; txt_categoria.value = ""
+            txt_valor.value = ""
+            txt_descripcion.value = ""
+            txt_categoria.value = ""
+            
             toast("✅ Movimiento agregado", COLORES["success"])
             cargar_dashboard()
-        except ValueError: toast("❌ Valor inválido", COLORES["danger"])
+        except ValueError:
+            toast("❌ Valor inválido", COLORES["danger"])
+        except Exception as ex:
+            toast(f"❌ Error: {str(ex)}", COLORES["danger"])
     
     formulario_movimiento = ft.Container(
         margin=ft.margin.only(left=16, right=16, top=8, bottom=8),
         padding=20, bgcolor=COLORES["card"], border_radius=16,
         border=ft.border.all(1, COLORES["border"]),
         content=ft.Column([
-            ft.Text("📝 Nuevo Movimiento", size=18, weight="bold", color=COLORES["text"]),
+            ft.Text("📝 Nuevo Movimiento", size=18, weight=ft.FontWeight.BOLD, color=COLORES["text"]),
             txt_descripcion,
             ft.Row([dropdown_tipo, txt_categoria], spacing=8),
             ft.Row([
                 txt_valor,
                 ft.Container(
                     width=52, height=52, bgcolor=COLORES["primary"], border_radius=16,
-                    on_click=guardar_movimiento, content=ft.Text("➕", size=24, color="white", text_align="center"),
+                    on_click=guardar_movimiento, ink=True,
+                    content=ft.Text("➕", size=24, color="white", text_align="center"),
                 )
             ], spacing=8)
         ], spacing=16)
     )
     
     # =========================================================
-    # Lista movimientos
+    # LISTA MOVIMIENTOS
     # =========================================================
     lista_movimientos = ft.Column(spacing=8, scroll=ft.ScrollMode.AUTO)
     
     def eliminar_movimiento(mov_id):
         def confirmar(e):
-            cursor.execute("DELETE FROM movimientos WHERE id = ?", (mov_id,)); conn.commit()
-            toast("🗑️ Eliminado", COLORES["success"]); cargar_dashboard()
-            dlg.open = False; page.update()
-        def cancelar(e): dlg.open = False; page.update()
+            cursor.execute("DELETE FROM movimientos WHERE id = ?", (mov_id,))
+            conn.commit()
+            toast("🗑️ Eliminado", COLORES["success"])
+            cargar_dashboard()
+            dlg.open = False
+            page.update()
+        
+        def cancelar(e):
+            dlg.open = False
+            page.update()
         
         dlg = ft.AlertDialog(
-            title=ft.Text("Confirmar", color=COLORES["text"], weight="bold"),
+            title=ft.Text("Confirmar", color=COLORES["text"], weight=ft.FontWeight.BOLD),
             content=ft.Text("¿Eliminar este movimiento?", color=COLORES["text_secondary"]),
             bgcolor=COLORES["bg_secondary"], shape=ft.RoundedRectangleBorder(radius=16),
             actions=[
                 ft.TextButton("Cancelar", on_click=cancelar),
-                ft.TextButton("Eliminar", on_click=confirmar)
-            ]
+                ft.TextButton("Eliminar", on_click=confirmar, style=ft.ButtonStyle(color=COLORES["danger"]))
+            ],
+            actions_alignment=ft.MainAxisAlignment.END
         )
-        page.dialog = dlg; dlg.open = True; page.update()
+        page.dialog = dlg
+        dlg.open = True
+        page.update()
     
     # =========================================================
-    # Vista IA
+    # VISTA IA
     # =========================================================
     columna_ia = ft.Column(spacing=16, scroll=ft.ScrollMode.AUTO)
     
@@ -411,6 +437,7 @@ def main(page: ft.Page):
         columna_ia.controls.clear()
         
         mes, anio = estado["mes"], estado["anio"]
+        
         cursor.execute("""
             SELECT tipo, COALESCE(SUM(valor), 0) 
             FROM movimientos WHERE substr(fecha_full,1,4)=? AND substr(fecha_full,6,2)=?
@@ -432,18 +459,16 @@ def main(page: ft.Page):
         
         score = motor_ia.calcular_score_financiero(ing, gas, ahorros, 0)
         
-        # Header
         columna_ia.controls.append(
             ft.Container(
                 margin=ft.margin.only(bottom=8),
                 content=ft.Column([
-                    ft.Text("# Mi Bolsillo", size=28, weight="bold", color=COLORES["text"]),
+                    ft.Text("# Mi Bolsillo", size=28, weight=ft.FontWeight.BOLD, color=COLORES["text"]),
                     ft.Text("Tu asistente financiero", size=14, color=COLORES["text_secondary"])
                 ])
             )
         )
         
-        # Score
         columna_ia.controls.append(
             ft.Container(
                 padding=24, bgcolor=score["color"], border_radius=24, margin=ft.margin.only(bottom=16),
@@ -452,15 +477,14 @@ def main(page: ft.Page):
                         width=70, height=70, bgcolor="#ffffff20", border_radius=35,
                         content=ft.Text(score["emoji"], size=40, text_align="center"),
                     ),
-                    ft.Row([ft.Text(f"{score['score']}/10", size=48, weight="bold", color="white")], 
+                    ft.Row([ft.Text(f"{score['score']}/10", size=48, weight=ft.FontWeight.BOLD, color="white")], 
                           alignment=ft.MainAxisAlignment.CENTER),
-                    ft.Text(score["nivel"], size=18, color="white", weight="bold"),
+                    ft.Text(score["nivel"], size=18, color="white", weight=ft.FontWeight.BOLD),
                     ft.Text("Tu calificación financiera", size=12, color="#ffffffcc")
                 ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=8)
             )
         )
         
-        # Resumen
         columna_ia.controls.append(
             ft.Container(
                 padding=20, bgcolor=COLORES["card"], border_radius=16,
@@ -471,7 +495,7 @@ def main(page: ft.Page):
                             width=40, height=40, bgcolor=f"{COLORES['primary']}20", border_radius=20,
                             content=ft.Text("📋", size=20, color=COLORES["primary"], text_align="center"),
                         ),
-                        ft.Text("Resumen Ejecutivo", size=18, weight="bold", color=COLORES["text"])
+                        ft.Text("Resumen Ejecutivo", size=18, weight=ft.FontWeight.BOLD, color=COLORES["text"])
                     ]),
                     ft.Container(height=8),
                     ft.Text(motor_ia.generar_resumen_ejecutivo(ing, gas, balance), 
@@ -480,7 +504,6 @@ def main(page: ft.Page):
             )
         )
         
-        # Mes anterior
         mes_ant = str(int(mes)-1).zfill(2) if int(mes) > 1 else "12"
         anio_ant = anio if int(mes) > 1 else str(int(anio)-1)
         cursor.execute("""
@@ -500,7 +523,7 @@ def main(page: ft.Page):
                             width=40, height=40, bgcolor=f"{COLORES['success']}20", border_radius=20,
                             content=ft.Text("📊", size=20, color=COLORES["success"], text_align="center"),
                         ),
-                        ft.Text("vs Mes Anterior", size=18, weight="bold", color=COLORES["text"])
+                        ft.Text("vs Mes Anterior", size=18, weight=ft.FontWeight.BOLD, color=COLORES["text"])
                     ]),
                     ft.Container(height=8),
                     ft.Text(
@@ -511,7 +534,6 @@ def main(page: ft.Page):
             )
         )
         
-        # Alertas
         metas = [{"nombre": m[0]} for m in cursor.execute("SELECT nombre FROM ahorros").fetchall()]
         alertas = motor_ia.generar_alertas_personalizadas(ing, gas, ahorros, 0, metas)
         if alertas:
@@ -525,7 +547,7 @@ def main(page: ft.Page):
                                 width=40, height=40, bgcolor="#ffffff20", border_radius=20,
                                 content=ft.Text("🚨", size=20, color="white", text_align="center"),
                             ),
-                            ft.Text("Alertas", size=18, weight="bold", color="white")
+                            ft.Text("Alertas", size=18, weight=ft.FontWeight.BOLD, color="white")
                         ]),
                         ft.Container(height=8),
                         ft.Column([
@@ -536,7 +558,6 @@ def main(page: ft.Page):
                 )
             )
         
-        # Categorías
         cats = motor_ia.analizar_categorias_gastos(categorias, gas)
         if cats:
             columna_ia.controls.append(
@@ -549,7 +570,7 @@ def main(page: ft.Page):
                                 width=40, height=40, bgcolor=f"{COLORES['warning']}20", border_radius=20,
                                 content=ft.Text("💰", size=20, color=COLORES["warning"], text_align="center"),
                             ),
-                            ft.Text("Dónde gastas más", size=18, weight="bold", color=COLORES["text"])
+                            ft.Text("Dónde gastas más", size=18, weight=ft.FontWeight.BOLD, color=COLORES["text"])
                         ]),
                         ft.Container(height=8),
                         ft.Column([
@@ -558,8 +579,8 @@ def main(page: ft.Page):
                                 margin=ft.margin.only(bottom=8),
                                 content=ft.Column([
                                     ft.Row([
-                                        ft.Text(f"{i+1}. {c['categoria']}", size=16, weight="bold", color=COLORES["text"]),
-                                        ft.Text(_fmt_money(c['monto']), size=16, weight="bold", color=COLORES["danger"])
+                                        ft.Text(f"{i+1}. {c['categoria']}", size=16, weight=ft.FontWeight.BOLD, color=COLORES["text"]),
+                                        ft.Text(_fmt_money(c['monto']), size=16, weight=ft.FontWeight.BOLD, color=COLORES["danger"])
                                     ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                                     ft.Text(f"{c['porcentaje']:.1f}% de tus gastos", size=12, color=COLORES["text_secondary"]),
                                     ft.Text(c['insight'], size=12, color=COLORES["text_secondary"], italic=True)
@@ -570,7 +591,6 @@ def main(page: ft.Page):
                 )
             )
         
-        # Consejos
         consejos = motor_ia.generar_consejos_personalizados(ing, gas, ahorros, 0, cats)
         columna_ia.controls.append(
             ft.Container(
@@ -582,7 +602,7 @@ def main(page: ft.Page):
                             width=40, height=40, bgcolor=f"{COLORES['purple']}20", border_radius=20,
                             content=ft.Text("💡", size=20, color=COLORES["purple"], text_align="center"),
                         ),
-                        ft.Text("Consejos para ti", size=18, weight="bold", color=COLORES["text"])
+                        ft.Text("Consejos para ti", size=18, weight=ft.FontWeight.BOLD, color=COLORES["text"])
                     ]),
                     ft.Container(height=8),
                     ft.Column([
@@ -595,7 +615,6 @@ def main(page: ft.Page):
             )
         )
         
-        # Meta
         columna_ia.controls.append(
             ft.Container(
                 padding=20,
@@ -611,7 +630,7 @@ def main(page: ft.Page):
                             content=ft.Text("🎯", size=24, color="white", text_align="center"),
                         ),
                         ft.Column([
-                            ft.Text("Meta para el próximo mes", size=18, weight="bold", color="white"),
+                            ft.Text("Meta para el próximo mes", size=18, weight=ft.FontWeight.BOLD, color="white"),
                             ft.Text(motor_ia.generar_meta_proximo_mes(ing, gas, ahorros), 
                                    size=14, color="#ffffffdd")
                         ], spacing=4)
@@ -623,7 +642,7 @@ def main(page: ft.Page):
         page.update()
     
     # =========================================================
-    # Vista IA con botón
+    # VISTA IA CON BOTÓN
     # =========================================================
     vista_ia = ft.Container(
         expand=True,
@@ -641,7 +660,7 @@ def main(page: ft.Page):
                                 content=ft.Text("🤖", size=40, color=COLORES["primary"], text_align="center"),
                             ),
                             ft.Container(height=8),
-                            ft.Text("Análisis con IA", size=20, weight="bold", color=COLORES["text"]),
+                            ft.Text("Análisis con IA", size=20, weight=ft.FontWeight.BOLD, color=COLORES["text"]),
                             ft.Text("Obtén recomendaciones personalizadas", 
                                    size=14, color=COLORES["text_secondary"], text_align="center"),
                             ft.Container(height=8),
@@ -651,7 +670,7 @@ def main(page: ft.Page):
                                 on_click=analizar_finanzas, ink=True,
                                 content=ft.Row([
                                     ft.Text("🔍", size=20),
-                                    ft.Text("Analizar Mis Finanzas", color="white", weight="bold", size=16)
+                                    ft.Text("Analizar Mis Finanzas", color="white", weight=ft.FontWeight.BOLD, size=16)
                                 ], alignment=ft.MainAxisAlignment.CENTER, spacing=10)
                             )
                         ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=8)
@@ -664,7 +683,7 @@ def main(page: ft.Page):
     )
     
     # =========================================================
-    # Cargar dashboard
+    # CARGAR DASHBOARD
     # =========================================================
     def cargar_dashboard():
         lista_movimientos.controls.clear()
@@ -708,7 +727,7 @@ def main(page: ft.Page):
                                 content=ft.Text(icono, size=22, color=color, text_align="center"),
                             ),
                             ft.Column([
-                                ft.Text(desc, size=14, weight="bold", color=COLORES["text"]),
+                                ft.Text(desc, size=14, weight=ft.FontWeight.BOLD, color=COLORES["text"]),
                                 ft.Row([
                                     ft.Container(
                                         padding=ft.padding.symmetric(horizontal=6, vertical=2),
@@ -724,10 +743,10 @@ def main(page: ft.Page):
                             ], spacing=4)
                         ], spacing=12),
                         ft.Row([
-                            ft.Text(f"{signo}{_fmt_money(val)}", size=16, weight="bold", color=color),
+                            ft.Text(f"{signo}{_fmt_money(val)}", size=16, weight=ft.FontWeight.BOLD, color=color),
                             ft.Container(
                                 width=36, height=36, bgcolor=f"{COLORES['danger']}20", border_radius=10,
-                                on_click=lambda e, mid=mid: eliminar_movimiento(mid),
+                                on_click=lambda e, mid=mid: eliminar_movimiento(mid), ink=True,
                                 content=ft.Text("🗑️", size=16, color=COLORES["danger"], text_align="center"),
                             )
                         ], spacing=8)
@@ -745,7 +764,7 @@ def main(page: ft.Page):
                             content=ft.Text("📊", size=40, text_align="center"),
                         ),
                         ft.Container(height=16),
-                        ft.Text("Sin movimientos", size=18, weight="bold", color=COLORES["text"]),
+                        ft.Text("Sin movimientos", size=18, weight=ft.FontWeight.BOLD, color=COLORES["text"]),
                         ft.Text("Agrega tu primer movimiento", size=13, color=COLORES["text_secondary"])
                     ], horizontal_alignment=ft.CrossAxisAlignment.CENTER)
                 )
@@ -767,7 +786,7 @@ def main(page: ft.Page):
         page.update()
     
     # =========================================================
-    # Vistas
+    # VISTAS
     # =========================================================
     vista_inicio = ft.Container(
         expand=True,
@@ -779,8 +798,9 @@ def main(page: ft.Page):
                 padding=ft.padding.symmetric(horizontal=16),
                 content=ft.Column([
                     ft.Row([
-                        ft.Text("Historial", size=18, weight="bold", color=COLORES["text"]),
-                        ft.Text("0 movimientos", size=12, color=COLORES["text_secondary"])
+                        ft.Text("Historial", size=18, weight=ft.FontWeight.BOLD, color=COLORES["text"]),
+                        ft.Text(f"{len(movs) if 'movs' in dir() else 0} movimientos", 
+                               size=12, color=COLORES["text_secondary"])
                     ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                     lista_movimientos
                 ])
@@ -795,13 +815,16 @@ def main(page: ft.Page):
             ft.Container(height=100),
             ft.Container(
                 width=120, height=120,
-                gradient=ft.LinearGradient(begin=ft.Alignment(-1,-1), end=ft.Alignment(1,1), colors=[COLORES["success"], "#059669"]),
+                gradient=ft.LinearGradient(
+                    begin=ft.Alignment(-1, -1), end=ft.Alignment(1, 1),
+                    colors=[COLORES["success"], "#059669"]
+                ),
                 border_radius=60,
                 content=ft.Text("🎯", size=60, color="white", text_align="center"),
             ),
             ft.Container(height=24),
-            ft.Text("Próximamente", size=28, weight="bold", color=COLORES["text"]),
-            ft.Text("Sección de ahorros", size=14, color=COLORES["text_secondary"])
+            ft.Text("Próximamente", size=28, weight=ft.FontWeight.BOLD, color=COLORES["text"]),
+            ft.Text("Sección de ahorros", size=14, color=COLORES["text_secondary"], text_align="center")
         ], horizontal_alignment=ft.CrossAxisAlignment.CENTER)
     )
     
@@ -811,23 +834,27 @@ def main(page: ft.Page):
             ft.Container(height=100),
             ft.Container(
                 width=120, height=120,
-                gradient=ft.LinearGradient(begin=ft.Alignment(-1,-1), end=ft.Alignment(1,1), colors=[COLORES["danger"], "#dc2626"]),
+                gradient=ft.LinearGradient(
+                    begin=ft.Alignment(-1, -1), end=ft.Alignment(1, 1),
+                    colors=[COLORES["danger"], "#dc2626"]
+                ),
                 border_radius=60,
                 content=ft.Text("💳", size=60, color="white", text_align="center"),
             ),
             ft.Container(height=24),
-            ft.Text("Próximamente", size=28, weight="bold", color=COLORES["text"]),
-            ft.Text("Sección de deudas", size=14, color=COLORES["text_secondary"])
+            ft.Text("Próximamente", size=28, weight=ft.FontWeight.BOLD, color=COLORES["text"]),
+            ft.Text("Sección de deudas", size=14, color=COLORES["text_secondary"], text_align="center")
         ], horizontal_alignment=ft.CrossAxisAlignment.CENTER)
     )
     
     # =========================================================
-    # Navegación
+    # NAVEGACIÓN
     # =========================================================
     contenedor = ft.Container(expand=True, content=vista_inicio)
     
     def cambiar_vista(vista, e=None):
-        if estado["vista_actual"] == vista: return
+        if estado["vista_actual"] == vista:
+            return
         
         if vista == "inicio":
             contenedor.content = vista_inicio
@@ -845,10 +872,12 @@ def main(page: ft.Page):
     
     def crear_boton_nav(icono, texto, vista, activo=False):
         return ft.Container(
-            expand=True, padding=ft.padding.symmetric(vertical=12),
+            expand=True,
+            padding=ft.padding.symmetric(vertical=12),
             on_click=lambda e: cambiar_vista(vista, e),
             bgcolor=f"{COLORES['primary']}20" if activo else "transparent",
-            border_radius=12, ink=True,
+            border_radius=12,
+            ink=True,
             content=ft.Column([
                 ft.Text(icono, size=22, color=COLORES["primary"] if activo else COLORES["text_secondary"]),
                 ft.Text(texto, size=11, color=COLORES["text"] if activo else COLORES["text_secondary"])
@@ -874,7 +903,7 @@ def main(page: ft.Page):
 
 
 # =========================================================
-# PARA RENDER - ÚNICA INSTANCIA DE app EN NIVEL SUPERIOR
+# PARA RENDER - NIVEL SUPERIOR
 # =========================================================
 app = ft.app(target=main)
 
